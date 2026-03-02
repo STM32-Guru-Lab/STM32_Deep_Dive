@@ -39,9 +39,11 @@ CFLAGS += -Wall -Wextra -Werror
 CFLAGS += -DSTM32F103x6 -I./src
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -fno-common -std=c11
+CFLAGS += -MMD -MP
 
 # Assembler Flags
 ASFLAGS := -mcpu=cortex-m3 -mthumb -g
+ASFLAGS += -MMD -MP
 
 # ============================================================================
 # Linker Flags (korrigiert mit specs)
@@ -62,6 +64,7 @@ SRC_S := src/startup_stm32f103c6.s
 OBJ_C := $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SRC_C))
 OBJ_S := $(patsubst src/%.s,$(OBJ_DIR)/%.o,$(SRC_S))
 OBJS  := $(OBJ_C) $(OBJ_S)
+DEPS  := $(OBJS:.o=.d)
 
 # ============================================================================
 # Haupt-Targets
@@ -71,7 +74,7 @@ all: $(BUILD_DIR)/$(PROJECT).elf $(BUILD_DIR)/$(PROJECT).bin $(BUILD_DIR)/$(PROJ
 	@$(SIZE) $(BUILD_DIR)/$(PROJECT).elf
 
 $(BUILD_DIR)/$(PROJECT).elf: $(OBJS) linker/stm32f103c6t6.ld | $(BUILD_DIR)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS)
+	$(CC) $(OBJS) $(LDFLAGS) -o $@
 	@echo "✓ ELF erstellt: $@"
 
 $(BUILD_DIR)/$(PROJECT).bin: $(BUILD_DIR)/$(PROJECT).elf
@@ -104,7 +107,7 @@ $(OBJ_DIR):
 # Flash & Debug (korrigierte OpenOCD Syntax)
 # ============================================================================
 check-openocd:
-	@command -v $(OPENOCD) >/dev/null 2>&1 || { \
+	@test -x "$(OPENOCD)" || command -v "$(OPENOCD)" >/dev/null 2>&1 || { \
 		echo "Error: OpenOCD nicht gefunden: $(OPENOCD)"; \
 		echo "Installiere OpenOCD (z.B. apt install openocd)"; \
 		echo "oder setze den Pfad explizit: make OPENOCD=/pfad/zu/openocd flash"; \
@@ -143,7 +146,7 @@ reset: check-openocd
 debug: check-gdb check-openocd $(BUILD_DIR)/$(PROJECT).elf
 	@echo "Starte OpenOCD (Hintergrund) und GDB..."
 	@set -e; \
-	if pgrep -x openocd >/dev/null 2>&1; then \
+	if command -v ss >/dev/null 2>&1 && ss -lnt | grep -qE 'LISTEN.+:3333([[:space:]]|$$)'; then \
 		echo "Hinweis: OpenOCD läuft bereits, nutze bestehenden Server."; \
 		$(GDB) -x $(GDBINIT) $(BUILD_DIR)/$(PROJECT).elf; \
 	else \
@@ -170,3 +173,6 @@ disasm: $(BUILD_DIR)/$(PROJECT).disasm
 # Meta-Targets
 # ============================================================================
 .PHONY: all flash erase reset debug clean size disasm check-openocd check-gdb
+
+# Auto-Dependencies für C/ASM-Dateien
+-include $(DEPS)
