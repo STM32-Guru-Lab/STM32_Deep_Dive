@@ -1,0 +1,31 @@
+# GDB Initialisierungs-Script für STM32F103C6
+# Automatischer Connect nach OpenOCD Start
+
+# Ziel definieren
+target extended-remote :3333
+
+# Cortex-M spezifische Einstellungen
+monitor arm semihosting enable
+monitor reset halt
+
+# Flash laden und resetten
+load
+monitor reset halt
+
+# Breakpoint am main (optional)
+# break main
+
+# Debugging erleichtern
+set print pretty on
+set confirm off
+
+# Register anzeigen
+echo "Registers after reset:\n"
+info registers
+
+# Stack anzeigen
+echo "\nStack pointer:\n"
+print $sp
+
+# Fertig
+echo "\nReady for debugging. Type 'continue' or 'step'\n"

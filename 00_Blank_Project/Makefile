@@ -1,0 +1,172 @@
+# STM32 Bare Metal Foundation - Dogmatische Build Pipeline
+# FIXED VERSION - mit allen Korrekturen
+# WICHTIG: Rezepte mit TABS einrücken, nicht mit Spaces!
+
+# ============================================================================
+# DOGMA 1: Absolute Pfade, keine PATH-Magie
+# ============================================================================
+ARM_TOOLCHAIN := /opt/gcc-arm-12.3.rel1
+CC            := $(ARM_TOOLCHAIN)/bin/arm-none-eabi-gcc
+OBJCOPY       := $(ARM_TOOLCHAIN)/bin/arm-none-eabi-objcopy
+OBJDUMP       := $(ARM_TOOLCHAIN)/bin/arm-none-eabi-objdump
+SIZE          := $(ARM_TOOLCHAIN)/bin/arm-none-eabi-size
+GDB           ?= $(ARM_TOOLCHAIN)/bin/arm-none-eabi-gdb
+OPENOCD       ?= /usr/bin/openocd
+OPENOCD_CFG   := tools/openocd.cfg
+GDBINIT       ?= tools/gdbinit
+
+# ============================================================================
+# DOGMA 2: Version prüfen (robust)
+# ============================================================================
+GCC_VERSION := $(shell $(CC) --version | head -n1 | sed 's/.* \([0-9]\+\.[0-9]\+\.[0-9]\+\) .*/\1/')
+ifneq ($(GCC_VERSION),12.3.1)
+$(error Wrong GCC version. Expected 12.3.1, got $(GCC_VERSION))
+endif
+
+# ============================================================================
+# Projekt-Konfiguration
+# ============================================================================
+PROJECT     := firmware
+BUILD_DIR   := build
+OBJ_DIR     := $(BUILD_DIR)/obj
+TARGET      := STM32F103C6
+
+# ============================================================================
+# Compiler Flags
+# ============================================================================
+CFLAGS  := -mcpu=cortex-m3 -mthumb -Og -g3
+CFLAGS += -Wall -Wextra -Werror
+CFLAGS += -DSTM32F103x6 -I./src
+CFLAGS += -ffunction-sections -fdata-sections
+CFLAGS += -fno-common -std=c11
+
+# Assembler Flags
+ASFLAGS := -mcpu=cortex-m3 -mthumb -g
+
+# ============================================================================
+# Linker Flags (korrigiert mit specs)
+# ============================================================================
+LDFLAGS := -mcpu=cortex-m3 -mthumb
+LDFLAGS += -Tlinker/stm32f103c6t6.ld
+LDFLAGS += -Wl,--gc-sections -Wl,--print-memory-usage
+LDFLAGS += -nostartfiles
+LDFLAGS += --specs=nano.specs --specs=nosys.specs
+
+# ============================================================================
+# Quell-Dateien
+# ============================================================================
+SRC_C := src/system.c src/gpio.c src/main.c
+SRC_S := src/startup_stm32f103c6.s
+
+# Objekt-Dateien (im Build-Verzeichnis)
+OBJ_C := $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SRC_C))
+OBJ_S := $(patsubst src/%.s,$(OBJ_DIR)/%.o,$(SRC_S))
+OBJS  := $(OBJ_C) $(OBJ_S)
+
+# ============================================================================
+# Haupt-Targets
+# ============================================================================
+all: $(BUILD_DIR)/$(PROJECT).elf $(BUILD_DIR)/$(PROJECT).bin $(BUILD_DIR)/$(PROJECT).disasm
+	@echo "\n=== Größeninformation ==="
+	@$(SIZE) $(BUILD_DIR)/$(PROJECT).elf
+
+$(BUILD_DIR)/$(PROJECT).elf: $(OBJS) linker/stm32f103c6t6.ld | $(BUILD_DIR)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS)
+	@echo "✓ ELF erstellt: $@"
+
+$(BUILD_DIR)/$(PROJECT).bin: $(BUILD_DIR)/$(PROJECT).elf
+	$(OBJCOPY) -O binary $< $@
+	@echo "✓ Binary erstellt: $@"
+
+$(BUILD_DIR)/$(PROJECT).disasm: $(BUILD_DIR)/$(PROJECT).elf
+	$(OBJDUMP) -d $< > $@
+	@echo "✓ Disassembly erstellt: $@"
+
+# ============================================================================
+# Compile-Regeln (WICHTIG: Tabs für Rezepte!)
+# ============================================================================
+# C zu Objekt
+$(OBJ_DIR)/%.o: src/%.c | $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Assembler zu Objekt
+$(OBJ_DIR)/%.o: src/%.s | $(OBJ_DIR)
+	$(CC) $(ASFLAGS) -c $< -o $@
+
+# Verzeichnisse erstellen
+$(BUILD_DIR):
+	mkdir -p $@
+
+$(OBJ_DIR):
+	mkdir -p $@
+
+# ============================================================================
+# Flash & Debug (korrigierte OpenOCD Syntax)
+# ============================================================================
+check-openocd:
+	@command -v $(OPENOCD) >/dev/null 2>&1 || { \
+		echo "Error: OpenOCD nicht gefunden: $(OPENOCD)"; \
+		echo "Installiere OpenOCD (z.B. apt install openocd)"; \
+		echo "oder setze den Pfad explizit: make OPENOCD=/pfad/zu/openocd flash"; \
+		exit 127; \
+	}
+	@test -f $(OPENOCD_CFG) || { \
+		echo "Error: OpenOCD Config fehlt: $(OPENOCD_CFG)"; \
+		exit 1; \
+	}
+
+check-gdb:
+	@$(GDB) --version >/dev/null 2>&1 || { \
+		echo "Error: GDB nicht startbar: $(GDB)"; \
+		echo "Hinweis: Dein Toolchain-GDB braucht oft libncursesw.so.5."; \
+		echo "Option A: fehlende Bibliothek installieren"; \
+		echo "Option B: make GDB=gdb-multiarch debug"; \
+		exit 127; \
+	}
+	@test -f $(GDBINIT) || { \
+		echo "Error: GDB Init fehlt: $(GDBINIT)"; \
+		exit 1; \
+	}
+
+flash: check-openocd $(BUILD_DIR)/$(PROJECT).bin
+	$(OPENOCD) -f $(OPENOCD_CFG) \
+	    -c "init; halt; program $(BUILD_DIR)/$(PROJECT).bin 0x08000000 verify; reset run; shutdown"
+
+erase: check-openocd
+	$(OPENOCD) -f $(OPENOCD_CFG) \
+	    -c "init; halt; stm32f1x mass_erase 0; reset run; shutdown"
+
+reset: check-openocd
+	$(OPENOCD) -f $(OPENOCD_CFG) \
+	    -c "init; reset run; shutdown"
+
+debug: check-gdb check-openocd $(BUILD_DIR)/$(PROJECT).elf
+	@echo "Starte OpenOCD (Hintergrund) und GDB..."
+	@set -e; \
+	if pgrep -x openocd >/dev/null 2>&1; then \
+		echo "Hinweis: OpenOCD läuft bereits, nutze bestehenden Server."; \
+		$(GDB) -x $(GDBINIT) $(BUILD_DIR)/$(PROJECT).elf; \
+	else \
+		$(OPENOCD) -f $(OPENOCD_CFG) >/tmp/openocd-$(PROJECT).log 2>&1 & \
+		OPENOCD_PID=$$!; \
+		trap 'kill $$OPENOCD_PID >/dev/null 2>&1 || true' EXIT INT TERM; \
+		sleep 0.5; \
+		$(GDB) -x $(GDBINIT) $(BUILD_DIR)/$(PROJECT).elf; \
+	fi
+
+# ============================================================================
+# Utility Targets
+# ============================================================================
+clean:
+	rm -rf $(BUILD_DIR)
+
+size: $(BUILD_DIR)/$(PROJECT).elf
+	@$(SIZE) $<
+
+disasm: $(BUILD_DIR)/$(PROJECT).disasm
+	@echo "Disassembly in $(BUILD_DIR)/$(PROJECT).disasm"
+
+# ============================================================================
+# Meta-Targets
+# ============================================================================
+.PHONY: all flash erase reset debug clean size disasm check-openocd check-gdb
