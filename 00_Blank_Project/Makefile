@@ -1,6 +1,15 @@
-# STM32 Bare Metal Foundation - Dogmatische Build Pipeline
-# FIXED VERSION - mit allen Korrekturen
-# WICHTIG: Rezepte mit TABS einrücken, nicht mit Spaces!
+# ============================================================================
+# STM32 Bare Metal Foundation - Makefile
+# Author: Pavel
+# Erstellt fuer: STM32-Guru
+# Ziel: STM32F103C6 Bare-Metal Build/Flash/Debug Pipeline
+#
+# Randnotizen:
+# - Build-Profile: BUILD=debug (Default) | BUILD=release (size-optimiert)
+# - Haupt-Targets: all, flash, erase, reset, debug, hex, size, clean
+# - Tooling: arm-none-eabi-gcc + OpenOCD + GDB
+# - WICHTIG: Rezepte mit TABS einruecken, nicht mit Spaces
+# ============================================================================
 
 # ============================================================================
 # DOGMA 1: Absolute Pfade, keine PATH-Magie
@@ -30,11 +39,22 @@ PROJECT     := firmware
 BUILD_DIR   := build
 OBJ_DIR     := $(BUILD_DIR)/obj
 TARGET      := STM32F103C6
+BUILD       ?= debug
+
+ifeq ($(BUILD),debug)
+OPT_CFLAGS  := -Og -g3
+OPT_ASFLAGS := -g
+else ifeq ($(BUILD),release)
+OPT_CFLAGS  := -Os -g0 -DNDEBUG
+OPT_ASFLAGS := -g0
+else
+$(error Invalid BUILD='$(BUILD)'. Use BUILD=debug or BUILD=release)
+endif
 
 # ============================================================================
 # Compiler Flags
 # ============================================================================
-CFLAGS  := -mcpu=cortex-m3 -mthumb -Og -g3
+CFLAGS  := -mcpu=cortex-m3 -mthumb $(OPT_CFLAGS)
 CFLAGS += -Wall -Wextra -Werror
 CFLAGS += -DSTM32F103x6 -I./src
 CFLAGS += -ffunction-sections -fdata-sections
@@ -42,7 +62,7 @@ CFLAGS += -fno-common -std=c11
 CFLAGS += -MMD -MP
 
 # Assembler Flags
-ASFLAGS := -mcpu=cortex-m3 -mthumb -g
+ASFLAGS := -mcpu=cortex-m3 -mthumb $(OPT_ASFLAGS)
 ASFLAGS += -MMD -MP
 
 # ============================================================================
@@ -80,6 +100,10 @@ $(BUILD_DIR)/$(PROJECT).elf: $(OBJS) linker/stm32f103c6t6.ld | $(BUILD_DIR)
 $(BUILD_DIR)/$(PROJECT).bin: $(BUILD_DIR)/$(PROJECT).elf
 	$(OBJCOPY) -O binary $< $@
 	@echo "✓ Binary erstellt: $@"
+
+$(BUILD_DIR)/$(PROJECT).hex: $(BUILD_DIR)/$(PROJECT).elf
+	$(OBJCOPY) -O ihex $< $@
+	@echo "✓ HEX erstellt: $@"
 
 $(BUILD_DIR)/$(PROJECT).disasm: $(BUILD_DIR)/$(PROJECT).elf
 	$(OBJDUMP) -d $< > $@
@@ -169,10 +193,13 @@ size: $(BUILD_DIR)/$(PROJECT).elf
 disasm: $(BUILD_DIR)/$(PROJECT).disasm
 	@echo "Disassembly in $(BUILD_DIR)/$(PROJECT).disasm"
 
+hex: $(BUILD_DIR)/$(PROJECT).hex
+	@echo "HEX in $(BUILD_DIR)/$(PROJECT).hex"
+
 # ============================================================================
 # Meta-Targets
 # ============================================================================
-.PHONY: all flash erase reset debug clean size disasm check-openocd check-gdb
+.PHONY: all flash erase reset debug clean size disasm hex check-openocd check-gdb
 
 # Auto-Dependencies für C/ASM-Dateien
 -include $(DEPS)
