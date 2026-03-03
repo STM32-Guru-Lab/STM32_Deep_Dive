@@ -139,7 +139,3 @@ openocd -f tools/openocd.cfg
 - ST-Link korrekt angesteckt?
 - OpenOCD läuft im Hintergrund? (wird von `make flash` gestartet)
 - Firewall blockt OpenOCD?
-
-## Lizenz
-
-Dieses Blank-Projekt steht zur freien Verwendung zur Verfügung.
