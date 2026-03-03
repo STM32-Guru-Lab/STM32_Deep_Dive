@@ -51,13 +51,13 @@ int main(void) {
         gpio_toggle(GPIOC, 13);
         
         /* Kurze Delay */
-        simple_delay(200000);
+        simple_delay(400000);
         
         /* Debug-Pin LOW (Timing-Marker Ende) */
         gpio_clear(GPIOA, 0);
         
         /* Nochmal Delay */
-        simple_delay(200000);
+        simple_delay(400000);
     }
     
     /* Wird nie erreicht */
