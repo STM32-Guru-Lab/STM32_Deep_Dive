@@ -1,9 +1,9 @@
 /**
  * @file gpio.h
- * @brief GPIO Treiber für STM32F103 (CMSIS basiert)
+ * @brief GPIO Treiber fuer STM32F103 (CMSIS-basiert)
  * 
- * Keine HAL, nur strukturierte Registerzugriffe.
- * BSRR statt ODR für atomare Operationen.
+ * Strukturierte Registerzugriffe ohne HAL.
+ * BSRR wird fuer atomare Set/Reset-Operationen verwendet.
  */
 
 #ifndef GPIO_H
@@ -27,7 +27,7 @@ typedef enum {
 typedef enum {
     /* Input mode configurations */
     GPIO_CNF_INPUT_ANALOG    = 0x00, /* Analog input */
-    GPIO_CNF_INPUT_FLOATING  = 0x01, /* Floating input (danger!) */
+    GPIO_CNF_INPUT_FLOATING  = 0x01, /* Floating input */
     GPIO_CNF_INPUT_PULL      = 0x02, /* Input with pull-up/pull-down */
     
     /* Output mode configurations */
@@ -59,7 +59,7 @@ void gpio_clear(GPIO_TypeDef* port, uint16_t pin);
 
 /**
  * @brief Toggelt einen Pin (mit ODR, da BSRR kein Toggle kann)
- * Achtung: Nicht ISR-sicher! Nur im gleichen Thread verwenden.
+ * Operation erfolgt nicht atomar und ist nicht ISR-sicher.
  */
 void gpio_toggle(GPIO_TypeDef* port, uint16_t pin);
 

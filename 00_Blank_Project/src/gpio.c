@@ -8,7 +8,7 @@
 /**
  * @brief Aktiviert Clock für einen GPIO-Port
  * 
- * Interne Hilfsfunktion, automatisch von gpio_init() aufgerufen.
+ * Interne Hilfsfunktion fuer gpio_init().
  */
 static void gpio_clock_enable(GPIO_TypeDef* port) {
     if(port == GPIOA) {
@@ -61,7 +61,7 @@ void gpio_init(GPIO_TypeDef* port, uint16_t pin, GpioMode mode, GpioConfig confi
     if(config == GPIO_CNF_INPUT_PULL) {
         if(mode == GPIO_MODE_INPUT) {
             /* Pull-Up (ODR=1) oder Pull-Down (ODR=0) */
-            /* Standardmäßig Pull-Up */
+            /* Default: Pull-Up */
             port->ODR |= (1 << pin);
         }
     }
@@ -78,7 +78,7 @@ void gpio_clear(GPIO_TypeDef* port, uint16_t pin) {
 }
 
 void gpio_toggle(GPIO_TypeDef* port, uint16_t pin) {
-    /* ODR für Toggle (nicht atomic, nicht ISR-sicher!) */
+    /* ODR fuer Toggle (nicht atomar) */
     port->ODR ^= (1 << pin);
 }
 

@@ -1,18 +1,18 @@
 # ============================================================================
 # STM32 Bare Metal Foundation - Makefile
 # Author: Pavel
-# Erstellt fuer: STM32-Guru
-# Ziel: STM32F103C6 Bare-Metal Build/Flash/Debug Pipeline
+# Projekt: STM32-Guru
+# Ziel: Build-, Flash- und Debug-Ablauf fuer STM32F103C6
 #
-# Randnotizen:
+# Hinweise:
 # - Build-Profile: BUILD=debug (Default) | BUILD=release (size-optimiert)
 # - Haupt-Targets: all, flash, erase, reset, debug, hex, size, clean
 # - Tooling: arm-none-eabi-gcc + OpenOCD + GDB
-# - WICHTIG: Rezepte mit TABS einruecken, nicht mit Spaces
+# - Make-Rezepte werden mit TAB eingerueckt
 # ============================================================================
 
 # ============================================================================
-# DOGMA 1: Absolute Pfade, keine PATH-Magie
+# Toolchain-Pfade
 # ============================================================================
 ARM_TOOLCHAIN := /opt/gcc-arm-12.3.rel1
 CC            := $(ARM_TOOLCHAIN)/bin/arm-none-eabi-gcc
@@ -25,7 +25,7 @@ OPENOCD_CFG   := tools/openocd.cfg
 GDBINIT       ?= tools/gdbinit
 
 # ============================================================================
-# DOGMA 2: Version prüfen (robust)
+# Toolchain-Version pruefen
 # ============================================================================
 GCC_VERSION := $(shell $(CC) --version | head -n1 | sed 's/.* \([0-9]\+\.[0-9]\+\.[0-9]\+\) .*/\1/')
 ifneq ($(GCC_VERSION),12.3.1)
@@ -66,7 +66,7 @@ ASFLAGS := -mcpu=cortex-m3 -mthumb $(OPT_ASFLAGS)
 ASFLAGS += -MMD -MP
 
 # ============================================================================
-# Linker Flags (korrigiert mit specs)
+# Linker Flags
 # ============================================================================
 LDFLAGS := -mcpu=cortex-m3 -mthumb
 LDFLAGS += -Tlinker/stm32f103c6t6.ld
@@ -110,7 +110,7 @@ $(BUILD_DIR)/$(PROJECT).disasm: $(BUILD_DIR)/$(PROJECT).elf
 	@echo "✓ Disassembly erstellt: $@"
 
 # ============================================================================
-# Compile-Regeln (WICHTIG: Tabs für Rezepte!)
+# Compile-Regeln (TAB fuer Rezepte)
 # ============================================================================
 # C zu Objekt
 $(OBJ_DIR)/%.o: src/%.c | $(OBJ_DIR)
@@ -128,7 +128,7 @@ $(OBJ_DIR):
 	mkdir -p $@
 
 # ============================================================================
-# Flash & Debug (korrigierte OpenOCD Syntax)
+# Flash- und Debug-Targets
 # ============================================================================
 check-openocd:
 	@test -x "$(OPENOCD)" || command -v "$(OPENOCD)" >/dev/null 2>&1 || { \
