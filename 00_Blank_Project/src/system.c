@@ -1,10 +1,10 @@
 /**
  * @file system.c
- * @brief System-Initialisierung für STM32F103C6
+ * @brief System-Initialisierung fuer STM32F103C6
  * 
- * Diese Datei enthält die Clock-Konfiguration.
+ * Diese Datei enthaelt die Clock-Konfiguration.
  * Standard: HSI 8MHz (nach Reset)
- * Später: HSE + PLL für 72MHz
+ * Erweiterte Konfigurationen koennen HSE+PLL verwenden.
  */
 
 #include "stm32f10x.h"
@@ -12,7 +12,7 @@
 /**
  * @brief Minimalste System-Initialisierung
  * 
- * Setzt nur das, was für 8MHz HSI-Betrieb notwendig ist:
+ * Konfiguriert die erforderlichen Schritte fuer 8MHz HSI-Betrieb:
  * - HSI als SYSCLK (8MHz)
  * - SYSCLK = HSI = 8MHz
  */
@@ -36,8 +36,7 @@ void SystemInit(void) {
 /**
  * @brief Aktualisiert SystemCoreClock Variable
  * 
- * Diese Funktion sollte aufgerufen werden, wenn sich die Clock-Konfiguration ändert.
- * Aktuell einfach auf 8MHz gesetzt.
+ * Aktualisiert die SystemCoreClock-Variable fuer die aktuelle Konfiguration.
  */
 void SystemCoreClockUpdate(void) {
     SystemCoreClock = 8000000;  /* HSI 8MHz */

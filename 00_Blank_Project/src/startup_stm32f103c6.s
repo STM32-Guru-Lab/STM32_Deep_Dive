@@ -1,6 +1,6 @@
 @ ===========================================================================
 @ Startup Code für STM32F103C6T6A (Cortex-M3)
-@ In ARM Assembler, kein C - damit wir sehen, was wirklich passiert
+@ ARM Assembler Implementierung
 @ ===========================================================================
 
 .syntax unified
@@ -33,7 +33,7 @@ _isr_vectors:
     .word   PendSV_Handler  @ PendSV Handler
     .word   SysTick_Handler @ SysTick Handler
 
-    @ Externe Interrupts (können später erweitert werden)
+    @ Externe Interrupts
     .rept 68
     .word   Default_Handler
     .endr
@@ -46,7 +46,7 @@ _isr_vectors:
 .type Reset_Handler, %function
 
 Reset_Handler:
-    @ 1. Stack Pointer setzen (wird normalerweise von HW gemacht, aber sicherheitshalber)
+    @ 1. Stack Pointer setzen
     ldr   r0, =_estack
     mov   sp, r0
 
@@ -82,7 +82,7 @@ Reset_Handler:
     @ 5. main() aufrufen
     bl    main
 
-    @ 6. Falls main() zurückkehrt (sollte nie passieren)
+    @ 6. Falls main() zurückkehrt
 .Infinite_Loop:
     b     .Infinite_Loop
 
@@ -102,8 +102,8 @@ Default_Handler:
 
 @ ===========================================================================
 @ Weak Aliases für alle Interrupt-Handler
-@ Jeder Handler zeigt zunächst auf Default_Handler
-@ Kann später in C überschrieben werden (z.B. SysTick_Handler)
+@ Handler zeigen initial auf Default_Handler
+@ Handler koennen in C ueberschrieben werden (z.B. SysTick_Handler)
 @ ===========================================================================
 .weak   NMI_Handler
 .thumb_set NMI_Handler, Default_Handler

@@ -1,9 +1,9 @@
 /**
  * @file main.c
- * @brief Minimaler Blinky für STM32F103C6
+ * @brief Minimales Blink-Beispiel fuer STM32F103C6
  * 
- * LED an PC13 (active-low auf Blue Pill)
- * Debug-Pin an PA0 für Timing-Messungen am Scope
+ * LED an PC13 (active-low, Blue Pill)
+ * Debug-Pin an PA0 fuer Timing-Messungen
  */
 
 #include "stm32f10x.h"
@@ -14,12 +14,11 @@
  * 
  * @param iterations Anzahl der Iterationen
  * 
- * Achtung: Nicht zeitlich genau! Nur für Demo.
- * Später durch Timer ersetzen.
+ * Busy-Wait Delay mit takt- und compilerabhaengiger Laufzeit.
  */
 static void simple_delay(uint32_t iterations) {
     for(volatile uint32_t i = 0; i < iterations; i++) {
-        __asm__("nop");  /* No Operation für stabilere Timing */
+        __asm__("nop");  /* No Operation */
     }
 }
 
@@ -30,7 +29,7 @@ static void simple_delay(uint32_t iterations) {
  * Gibt nie zurück.
  */
 int main(void) {
-    /* System ist bereits durch SystemInit() initialisiert (HSI 8MHz) */
+    /* SystemInit() konfiguriert den Takt auf HSI 8MHz */
     
     /* LED an PC13 initialisieren */
     gpio_init(GPIOC, 13, GPIO_MODE_OUTPUT_2MHZ, GPIO_CNF_OUTPUT_PUSHPULL);
@@ -51,15 +50,15 @@ int main(void) {
         gpio_toggle(GPIOC, 13);
         
         /* Kurze Delay */
-        simple_delay(400000);
+        simple_delay(5000);
         
         /* Debug-Pin LOW (Timing-Marker Ende) */
         gpio_clear(GPIOA, 0);
         
         /* Nochmal Delay */
-        simple_delay(400000);
+        simple_delay(5000);
     }
     
-    /* Wird nie erreicht */
+    /* Rueckgabepfad */
     return 0;
 }

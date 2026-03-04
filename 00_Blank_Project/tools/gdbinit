@@ -1,5 +1,5 @@
-# GDB Initialisierungs-Script für STM32F103C6
-# Automatischer Connect nach OpenOCD Start
+# GDB Initialisierung fuer STM32F103C6
+# Verbindungsaufbau nach OpenOCD Start
 
 # Ziel definieren
 target extended-remote :3333
@@ -12,10 +12,10 @@ monitor reset halt
 load
 monitor reset halt
 
-# Breakpoint am main (optional)
+# Breakpoint an main (optional)
 # break main
 
-# Debugging erleichtern
+# Debug-Ausgabe konfigurieren
 set print pretty on
 set confirm off
 
@@ -27,5 +27,5 @@ info registers
 echo "\nStack pointer:\n"
 print $sp
 
-# Fertig
+# Statusmeldung
 echo "\nReady for debugging. Type 'continue' or 'step'\n"

@@ -18,7 +18,7 @@ SECTIONS {
     /* Interrupt Vector Table am Anfang von Flash */
     .isr_vector : {
         . = ALIGN(4);
-        KEEP(*(.isr_vector))  /* Nicht wegoptimieren! */
+        KEEP(*(.isr_vector))  /* Beibehalten */
         . = ALIGN(4);
     } >FLASH
 
@@ -32,8 +32,8 @@ SECTIONS {
         . = ALIGN(4);
     } >FLASH
 
-    /* Initialisierte globale/static Variablen 
-     * Wird von Startup aus Flash in RAM kopiert */
+    /* Initialisierte globale/static Variablen
+     * Kopie aus Flash nach RAM im Startup */
     _sidata = LOADADDR(.data);  /* Startadresse der Initialwerte in Flash */
 
     .data : {
@@ -56,14 +56,14 @@ SECTIONS {
         _ebss = .;         /* Endadresse im RAM */
     } >RAM
 
-    /* Stack-Bereich (optional, für Debugging) */
+    /* Stack-Bereich */
     .stack : {
         . = ALIGN(8);
         . = . + 1024;      /* 1KB Stack */
         . = ALIGN(8);
     } >RAM
 
-    /* Debug-Informationen entfernen (reduziert Größe) */
+    /* Nicht benoetigte Abschnitte verwerfen */
     /DISCARD/ : {
         *(.note*)
         *(.comment)
