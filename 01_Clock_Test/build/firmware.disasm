@@ -1,0 +1,102 @@
+
+build/firmware.elf:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+080000ec <SystemInit>:
+ 80000ec:	4a10      	ldr	r2, [pc, #64]	@ (8000130 <SystemInit+0x44>)
+ 80000ee:	6813      	ldr	r3, [r2, #0]
+ 80000f0:	f043 0301 	orr.w	r3, r3, #1
+ 80000f4:	6013      	str	r3, [r2, #0]
+ 80000f6:	4b0e      	ldr	r3, [pc, #56]	@ (8000130 <SystemInit+0x44>)
+ 80000f8:	681b      	ldr	r3, [r3, #0]
+ 80000fa:	f013 0f02 	tst.w	r3, #2
+ 80000fe:	d0fa      	beq.n	80000f6 <SystemInit+0xa>
+ 8000100:	4b0b      	ldr	r3, [pc, #44]	@ (8000130 <SystemInit+0x44>)
+ 8000102:	685a      	ldr	r2, [r3, #4]
+ 8000104:	f022 0203 	bic.w	r2, r2, #3
+ 8000108:	605a      	str	r2, [r3, #4]
+ 800010a:	685a      	ldr	r2, [r3, #4]
+ 800010c:	605a      	str	r2, [r3, #4]
+ 800010e:	4b08      	ldr	r3, [pc, #32]	@ (8000130 <SystemInit+0x44>)
+ 8000110:	685b      	ldr	r3, [r3, #4]
+ 8000112:	f013 0f0c 	tst.w	r3, #12
+ 8000116:	d1fa      	bne.n	800010e <SystemInit+0x22>
+ 8000118:	4a05      	ldr	r2, [pc, #20]	@ (8000130 <SystemInit+0x44>)
+ 800011a:	6853      	ldr	r3, [r2, #4]
+ 800011c:	f423 537f 	bic.w	r3, r3, #16320	@ 0x3fc0
+ 8000120:	f023 0330 	bic.w	r3, r3, #48	@ 0x30
+ 8000124:	6053      	str	r3, [r2, #4]
+ 8000126:	4b03      	ldr	r3, [pc, #12]	@ (8000134 <SystemInit+0x48>)
+ 8000128:	4a03      	ldr	r2, [pc, #12]	@ (8000138 <SystemInit+0x4c>)
+ 800012a:	601a      	str	r2, [r3, #0]
+ 800012c:	4770      	bx	lr
+ 800012e:	bf00      	nop
+ 8000130:	40021000 	.word	0x40021000
+ 8000134:	20000000 	.word	0x20000000
+ 8000138:	007a1200 	.word	0x007a1200
+
+0800013c <main>:
+ 800013c:	4b0d      	ldr	r3, [pc, #52]	@ (8000174 <main+0x38>)
+ 800013e:	699a      	ldr	r2, [r3, #24]
+ 8000140:	f042 0201 	orr.w	r2, r2, #1
+ 8000144:	619a      	str	r2, [r3, #24]
+ 8000146:	699a      	ldr	r2, [r3, #24]
+ 8000148:	f042 0204 	orr.w	r2, r2, #4
+ 800014c:	619a      	str	r2, [r3, #24]
+ 800014e:	4a0a      	ldr	r2, [pc, #40]	@ (8000178 <main+0x3c>)
+ 8000150:	6851      	ldr	r1, [r2, #4]
+ 8000152:	f021 010f 	bic.w	r1, r1, #15
+ 8000156:	6051      	str	r1, [r2, #4]
+ 8000158:	6851      	ldr	r1, [r2, #4]
+ 800015a:	f041 010b 	orr.w	r1, r1, #11
+ 800015e:	6051      	str	r1, [r2, #4]
+ 8000160:	685a      	ldr	r2, [r3, #4]
+ 8000162:	f022 62e0 	bic.w	r2, r2, #117440512	@ 0x7000000
+ 8000166:	605a      	str	r2, [r3, #4]
+ 8000168:	685a      	ldr	r2, [r3, #4]
+ 800016a:	f042 62a0 	orr.w	r2, r2, #83886080	@ 0x5000000
+ 800016e:	605a      	str	r2, [r3, #4]
+ 8000170:	bf00      	nop
+ 8000172:	e7fd      	b.n	8000170 <main+0x34>
+ 8000174:	40021000 	.word	0x40021000
+ 8000178:	40010800 	.word	0x40010800
+
+0800017c <Reset_Handler>:
+ 800017c:	480b      	ldr	r0, [pc, #44]	@ (80001ac <.Infinite_Loop+0x2>)
+ 800017e:	490c      	ldr	r1, [pc, #48]	@ (80001b0 <.Infinite_Loop+0x6>)
+ 8000180:	4a0c      	ldr	r2, [pc, #48]	@ (80001b4 <.Infinite_Loop+0xa>)
+ 8000182:	e003      	b.n	800018c <.data_copy_check>
+
+08000184 <.data_copy_loop>:
+ 8000184:	f850 3b04 	ldr.w	r3, [r0], #4
+ 8000188:	f841 3b04 	str.w	r3, [r1], #4
+
+0800018c <.data_copy_check>:
+ 800018c:	4291      	cmp	r1, r2
+ 800018e:	d3f9      	bcc.n	8000184 <.data_copy_loop>
+ 8000190:	4809      	ldr	r0, [pc, #36]	@ (80001b8 <.Infinite_Loop+0xe>)
+ 8000192:	490a      	ldr	r1, [pc, #40]	@ (80001bc <.Infinite_Loop+0x12>)
+ 8000194:	f04f 0200 	mov.w	r2, #0
+ 8000198:	e001      	b.n	800019e <.bss_zero_check>
+
+0800019a <.bss_zero_loop>:
+ 800019a:	f840 2b04 	str.w	r2, [r0], #4
+
+0800019e <.bss_zero_check>:
+ 800019e:	4288      	cmp	r0, r1
+ 80001a0:	d3fb      	bcc.n	800019a <.bss_zero_loop>
+ 80001a2:	f7ff ffa3 	bl	80000ec <SystemInit>
+ 80001a6:	f7ff ffc9 	bl	800013c <main>
+
+080001aa <.Infinite_Loop>:
+ 80001aa:	e7fe      	b.n	80001aa <.Infinite_Loop>
+ 80001ac:	080001c4 	.word	0x080001c4
+ 80001b0:	20000000 	.word	0x20000000
+ 80001b4:	20000004 	.word	0x20000004
+ 80001b8:	20000004 	.word	0x20000004
+ 80001bc:	20000004 	.word	0x20000004
+
+080001c0 <ADC1_2_IRQHandler>:
+ 80001c0:	f7ff bffe 	b.w	80001c0 <ADC1_2_IRQHandler>
