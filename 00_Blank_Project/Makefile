@@ -38,6 +38,7 @@ endif
 PROJECT     := firmware
 BUILD_DIR   := build
 OBJ_DIR     := $(BUILD_DIR)/obj
+MAP_FILE    := $(BUILD_DIR)/$(PROJECT).map
 TARGET      := STM32F103C6
 BUILD       ?= debug
 
@@ -71,6 +72,7 @@ ASFLAGS += -MMD -MP
 LDFLAGS := -mcpu=cortex-m3 -mthumb
 LDFLAGS += -Tlinker/stm32f103c6t6.ld
 LDFLAGS += -Wl,--gc-sections -Wl,--print-memory-usage
+LDFLAGS += -Wl,-Map=$(MAP_FILE),--cref
 LDFLAGS += -nostartfiles
 LDFLAGS += --specs=nano.specs --specs=nosys.specs
 
@@ -96,6 +98,7 @@ all: $(BUILD_DIR)/$(PROJECT).elf $(BUILD_DIR)/$(PROJECT).bin $(BUILD_DIR)/$(PROJ
 $(BUILD_DIR)/$(PROJECT).elf: $(OBJS) linker/stm32f103c6t6.ld | $(BUILD_DIR)
 	$(CC) $(OBJS) $(LDFLAGS) -o $@
 	@echo "✓ ELF erstellt: $@"
+	@echo "✓ Memory-Map erstellt: $(MAP_FILE)"
 
 $(BUILD_DIR)/$(PROJECT).bin: $(BUILD_DIR)/$(PROJECT).elf
 	$(OBJCOPY) -O binary $< $@
