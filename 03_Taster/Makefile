@@ -6,7 +6,7 @@
 #
 # Hinweise:
 # - Build-Profile: BUILD=debug (Default) | BUILD=release (size-optimiert)
-# - Haupt-Targets: all, flash, erase, reset, debug, hex, size, clean
+# - Haupt-Targets: all, flash, erase, reset, debug, hex, size, clean, doctor
 # - Tooling: arm-none-eabi-gcc + OpenOCD + GDB
 # - Make-Rezepte werden mit TAB eingerueckt
 # ============================================================================
@@ -160,6 +160,30 @@ check-gdb:
 		exit 1; \
 	}
 
+check-vendor:
+	@test -f ../vendor/STM32F1036t6/CMSIS/Core/Include/core_cm3.h || { \
+		echo "Error: CMSIS Core Header fehlt: ../vendor/STM32F1036t6/CMSIS/Core/Include/core_cm3.h"; \
+		exit 1; \
+	}
+	@test -f ../vendor/STM32F1036t6/CMSIS/Device/ST/STM32F1xx/Include/stm32f103x6.h || { \
+		echo "Error: Device Header fehlt: ../vendor/STM32F1036t6/CMSIS/Device/ST/STM32F1xx/Include/stm32f103x6.h"; \
+		exit 1; \
+	}
+
+doctor: check-openocd check-gdb check-vendor
+	@echo "=== Environment Check ==="
+	@echo "Compiler: $(CC)"
+	@$(CC) --version | head -n1
+	@echo "GDB: $(GDB)"
+	@$(GDB) --version | head -n1
+	@echo "OpenOCD: $(OPENOCD)"
+	@$(OPENOCD) --version | head -n1
+	@echo "OpenOCD config: $(OPENOCD_CFG)"
+	@echo "GDB init: $(GDBINIT)"
+	@echo "Vendor Core Include: ../vendor/STM32F1036t6/CMSIS/Core/Include"
+	@echo "Vendor Device Include: ../vendor/STM32F1036t6/CMSIS/Device/ST/STM32F1xx/Include"
+	@echo "Doctor check finished successfully."
+
 flash: check-openocd $(BUILD_DIR)/$(PROJECT).bin
 	$(OPENOCD) -f $(OPENOCD_CFG) \
 	    -c "init; halt; program $(BUILD_DIR)/$(PROJECT).bin 0x08000000 verify; reset run; shutdown"
@@ -204,7 +228,7 @@ hex: $(BUILD_DIR)/$(PROJECT).hex
 # ============================================================================
 # Meta-Targets
 # ============================================================================
-.PHONY: all flash erase reset debug clean size disasm hex check-openocd check-gdb
+.PHONY: all flash erase reset debug clean size disasm hex doctor check-openocd check-gdb check-vendor
 
 # Auto-Dependencies für C/ASM-Dateien
 -include $(DEPS)

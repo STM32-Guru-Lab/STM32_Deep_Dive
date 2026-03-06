@@ -97,8 +97,14 @@ Die Zeitbasis wird ueber `systick.c/.h` bereitgestellt:
 
 | Befehl | Beschreibung |
 |--------|-------------|
+| `make doctor` | Prüft Build-/Debug-Umgebung (Compiler, GDB, OpenOCD, Vendor-Header) |
 | `make check-openocd` | Prüft OpenOCD-Installation |
 | `make check-gdb` | Prüft GDB-Installation |
+
+## Setup-Hinweise
+
+- Linux-Setup: `../SETUP_LINUX.md`
+- Windows-Setup via WSL2: `../SETUP_WINDOWS_WSL.md`
 
 ## Build-Profile
 
