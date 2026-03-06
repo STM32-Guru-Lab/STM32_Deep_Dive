@@ -15,6 +15,14 @@ Das Makefile erwartet standardmaessig:
 
 - `/opt/gcc-arm-12.3.rel1/bin/arm-none-eabi-gcc`
 
+Direkter Download-Link (12.3.rel1):
+
+- `https://developer.arm.com/-/media/files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi.tar.xz?rev=dccb66bb394240a98b87f0f24e70e87d&revision=dccb66bb-3942-40a9-8b87-f0f24e70e87d&hash=82F2CF5F30A9A32E8CF04BBF2C562FED`
+
+Uebersichtsseite fuer Arm GNU Toolchain Downloads:
+
+- `https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads`
+
 Beispiel:
 
 ```bash
