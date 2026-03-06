@@ -184,57 +184,54 @@ Disassembly of section .text:
  8000262:	bf00      	nop
  8000264:	20000004 	.word	0x20000004
 
-08000268 <systick_period_elapsed>:
+08000268 <systick_delay_ms>:
  8000268:	b538      	push	{r3, r4, r5, lr}
- 800026a:	4604      	mov	r4, r0
- 800026c:	460d      	mov	r5, r1
- 800026e:	f7ff fff5 	bl	800025c <systick_now_ms>
- 8000272:	6823      	ldr	r3, [r4, #0]
- 8000274:	1ac3      	subs	r3, r0, r3
- 8000276:	42ab      	cmp	r3, r5
- 8000278:	d201      	bcs.n	800027e <systick_period_elapsed+0x16>
- 800027a:	2000      	movs	r0, #0
+ 800026a:	4605      	mov	r5, r0
+ 800026c:	f7ff fff6 	bl	800025c <systick_now_ms>
+ 8000270:	4604      	mov	r4, r0
+ 8000272:	f7ff fff3 	bl	800025c <systick_now_ms>
+ 8000276:	1b00      	subs	r0, r0, r4
+ 8000278:	42a8      	cmp	r0, r5
+ 800027a:	d3fa      	bcc.n	8000272 <systick_delay_ms+0xa>
  800027c:	bd38      	pop	{r3, r4, r5, pc}
- 800027e:	6020      	str	r0, [r4, #0]
- 8000280:	2001      	movs	r0, #1
- 8000282:	e7fb      	b.n	800027c <systick_period_elapsed+0x14>
+	...
 
-08000284 <main>:
- 8000284:	b500      	push	{lr}
- 8000286:	b083      	sub	sp, #12
- 8000288:	f7ff ffcc 	bl	8000224 <systick_init_1ms>
- 800028c:	4d14      	ldr	r5, [pc, #80]	@ (80002e0 <main+0x5c>)
- 800028e:	2300      	movs	r3, #0
- 8000290:	2202      	movs	r2, #2
- 8000292:	210d      	movs	r1, #13
- 8000294:	4628      	mov	r0, r5
- 8000296:	f7ff ff87 	bl	80001a8 <gpio_init>
- 800029a:	4c12      	ldr	r4, [pc, #72]	@ (80002e4 <main+0x60>)
- 800029c:	2300      	movs	r3, #0
- 800029e:	2201      	movs	r2, #1
- 80002a0:	4619      	mov	r1, r3
- 80002a2:	4620      	mov	r0, r4
- 80002a4:	f7ff ff80 	bl	80001a8 <gpio_init>
- 80002a8:	210d      	movs	r1, #13
- 80002aa:	4628      	mov	r0, r5
- 80002ac:	f7ff ffa3 	bl	80001f6 <gpio_set>
- 80002b0:	2100      	movs	r1, #0
- 80002b2:	4620      	mov	r0, r4
- 80002b4:	f7ff ffa3 	bl	80001fe <gpio_clear>
- 80002b8:	f7ff ffd0 	bl	800025c <systick_now_ms>
- 80002bc:	9001      	str	r0, [sp, #4]
- 80002be:	f44f 71fa 	mov.w	r1, #500	@ 0x1f4
- 80002c2:	a801      	add	r0, sp, #4
- 80002c4:	f7ff ffd0 	bl	8000268 <systick_period_elapsed>
- 80002c8:	2800      	cmp	r0, #0
- 80002ca:	d0f8      	beq.n	80002be <main+0x3a>
- 80002cc:	210d      	movs	r1, #13
- 80002ce:	4804      	ldr	r0, [pc, #16]	@ (80002e0 <main+0x5c>)
- 80002d0:	f7ff ff99 	bl	8000206 <gpio_toggle>
- 80002d4:	2100      	movs	r1, #0
- 80002d6:	4803      	ldr	r0, [pc, #12]	@ (80002e4 <main+0x60>)
- 80002d8:	f7ff ff95 	bl	8000206 <gpio_toggle>
- 80002dc:	e7ef      	b.n	80002be <main+0x3a>
+08000280 <main>:
+ 8000280:	b508      	push	{r3, lr}
+ 8000282:	f7ff ffcf 	bl	8000224 <systick_init_1ms>
+ 8000286:	4d16      	ldr	r5, [pc, #88]	@ (80002e0 <main+0x60>)
+ 8000288:	2300      	movs	r3, #0
+ 800028a:	2202      	movs	r2, #2
+ 800028c:	210d      	movs	r1, #13
+ 800028e:	4628      	mov	r0, r5
+ 8000290:	f7ff ff8a 	bl	80001a8 <gpio_init>
+ 8000294:	4c13      	ldr	r4, [pc, #76]	@ (80002e4 <main+0x64>)
+ 8000296:	2300      	movs	r3, #0
+ 8000298:	2201      	movs	r2, #1
+ 800029a:	4619      	mov	r1, r3
+ 800029c:	4620      	mov	r0, r4
+ 800029e:	f7ff ff83 	bl	80001a8 <gpio_init>
+ 80002a2:	210d      	movs	r1, #13
+ 80002a4:	4628      	mov	r0, r5
+ 80002a6:	f7ff ffa6 	bl	80001f6 <gpio_set>
+ 80002aa:	2100      	movs	r1, #0
+ 80002ac:	4620      	mov	r0, r4
+ 80002ae:	f7ff ffa6 	bl	80001fe <gpio_clear>
+ 80002b2:	4c0c      	ldr	r4, [pc, #48]	@ (80002e4 <main+0x64>)
+ 80002b4:	2100      	movs	r1, #0
+ 80002b6:	4620      	mov	r0, r4
+ 80002b8:	f7ff ff9d 	bl	80001f6 <gpio_set>
+ 80002bc:	210d      	movs	r1, #13
+ 80002be:	4808      	ldr	r0, [pc, #32]	@ (80002e0 <main+0x60>)
+ 80002c0:	f7ff ffa1 	bl	8000206 <gpio_toggle>
+ 80002c4:	f44f 70fa 	mov.w	r0, #500	@ 0x1f4
+ 80002c8:	f7ff ffce 	bl	8000268 <systick_delay_ms>
+ 80002cc:	2100      	movs	r1, #0
+ 80002ce:	4620      	mov	r0, r4
+ 80002d0:	f7ff ff95 	bl	80001fe <gpio_clear>
+ 80002d4:	f44f 70fa 	mov.w	r0, #500	@ 0x1f4
+ 80002d8:	f7ff ffc6 	bl	8000268 <systick_delay_ms>
+ 80002dc:	e7e9      	b.n	80002b2 <main+0x32>
  80002de:	bf00      	nop
  80002e0:	40011000 	.word	0x40011000
  80002e4:	40010800 	.word	0x40010800
@@ -264,7 +261,7 @@ Disassembly of section .text:
  800030a:	4288      	cmp	r0, r1
  800030c:	d3fb      	bcc.n	8000306 <.bss_zero_loop>
  800030e:	f7ff feed 	bl	80000ec <SystemInit>
- 8000312:	f7ff ffb7 	bl	8000284 <main>
+ 8000312:	f7ff ffb5 	bl	8000280 <main>
 
 08000316 <.Infinite_Loop>:
  8000316:	e7fe      	b.n	8000316 <.Infinite_Loop>

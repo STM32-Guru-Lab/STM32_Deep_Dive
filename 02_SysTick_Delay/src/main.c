@@ -28,14 +28,13 @@ int main(void) {
     /* PA0 startet auf LOW. */
     gpio_clear(GPIOA, 0);
 
-    /* Der Zeitstempel dient als nicht-blockierender 500-ms-Software-Timer. */
-    uint32_t last_toggle_ms = systick_now_ms();
-
     while(1) {
-        if(systick_period_elapsed(&last_toggle_ms, 500U)) {
-            gpio_toggle(GPIOC, 13);
-            gpio_toggle(GPIOA, 0);
-        }
+        gpio_set(GPIOA, 0);
+        gpio_toggle(GPIOC, 13);
+        systick_delay_ms(500U);
+
+        gpio_clear(GPIOA, 0);
+        systick_delay_ms(500U);
     }
 
     return 0;
