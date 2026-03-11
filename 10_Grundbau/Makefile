@@ -191,6 +191,27 @@ doctor: check-openocd check-gdb check-vendor
 	@echo "Vendor Device Include: ../vendor/STM32F1036t6/CMSIS/Device/ST/STM32F1xx/Include"
 	@echo "Doctor check finished successfully."
 
+# ============================================================================
+# Device Information Targets
+# ============================================================================
+
+# Prüft ob Device verbunden ist (ohne Fehler bei Nicht-Verbindung)
+check-device-connection:
+	@if $(OPENOCD) -f $(OPENOCD_CFG) \
+	    -c "init; halt; echo 'connected'; shutdown" \
+	    2>/dev/null | grep -q "connected"; then \
+	    echo "✓ Device connected"; \
+	    exit 0; \
+	else \
+	    echo "✗ Device not connected or wrong target"; \
+	    exit 1; \
+	fi
+
+# Einfache Device-Verbindungsprüfung
+device-check: check-openocd
+	@echo "=== Device Connection Check ==="
+	@make --no-print-directory check-device-connection || true
+
 flash: check-openocd $(BUILD_DIR)/$(PROJECT).bin
 	$(OPENOCD) -f $(OPENOCD_CFG) \
 	    -c "init; halt; program $(BUILD_DIR)/$(PROJECT).bin 0x08000000 verify; reset run; shutdown"
@@ -233,9 +254,39 @@ hex: $(BUILD_DIR)/$(PROJECT).hex
 	@echo "HEX in $(BUILD_DIR)/$(PROJECT).hex"
 
 # ============================================================================
+# Help Target
+# ============================================================================
+help:
+	@echo "STM32 Grundbau Makefile - Available Targets:"
+	@echo ""
+	@echo "  Build Targets:"
+	@echo "    all          - Build everything (ELF, binary, disasm)"
+	@echo "    clean        - Remove build directory"
+	@echo "    size         - Show size of firmware"
+	@echo "    disasm       - Generate disassembly"
+	@echo "    hex          - Generate HEX file"
+	@echo ""
+	@echo "  Flash & Debug Targets:"
+	@echo "    flash        - Flash firmware to device"
+	@echo "    erase        - Mass erase flash"
+	@echo "    reset        - Reset device"
+	@echo "    debug        - Start GDB debugging session"
+	@echo ""
+	@echo "  Device Information Targets:"
+	@echo "    device-check - Check if device is connected"
+	@echo ""
+	@echo "  Environment Targets:"
+	@echo "    doctor       - Check toolchain and environment"
+	@echo ""
+	@echo "  Examples:"
+	@echo "    make all BUILD=release    - Build optimized release"
+	@echo "    make device-check         - Test connection"
+	@echo "    make doctor               - Check environment"
+
+# ============================================================================
 # Meta-Targets
 # ============================================================================
-.PHONY: all flash erase reset debug clean size disasm hex doctor check-openocd check-gdb check-vendor
+.PHONY: all flash erase reset debug clean size disasm hex doctor check-openocd check-gdb check-vendor device-check check-device-connection help
 
 # Auto-Dependencies für C/ASM-Dateien
 -include $(DEPS)
